@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google広告プレビューツール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            color: #333;
+            line-height: 1.4;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Google Search Result Style */
+        .search-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dadce0;
+        }
+        
+        .google-logo {
+            font-size: 24px;
+            font-weight: normal;
+            margin-right: 20px;
+        }
+        
+        .google-logo .g1 { color: #4285f4; }
+        .google-logo .o1 { color: #ea4335; }
+        .google-logo .o2 { color: #fbbc05; }
+        .google-logo .g2 { color: #4285f4; }
+        .google-logo .l { color: #34a853; }
+        .google-logo .e { color: #ea4335; }
+        
+        .search-box {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .search-results-info {
+            color: #70757a;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        /* Preview Container */
+        .preview-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .preview-section {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .preview-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        /* Search Ad Preview */
+        .ad-preview {
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 16px;
+            background-color: #fff;
+            box-shadow: 0 1px 6px rgba(32,33,36,.1);
+        }
+        
+        .ad-label {
+            font-size: 12px;
+            color: #5f6368;
+            margin-bottom: 8px;
+        }
+        
+        .ad-url {
+            color: #1a0dab;
+            font-size: 14px;
+            margin-bottom: 4px;
+            text-decoration: none;
+        }
+        
+        .ad-title {
+            color: #1a0dab;
+            font-size: 20px;
+            line-height: 1.3;
+            margin-bottom: 8px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .ad-title:hover {
+            text-decoration: underline;
+        }
+        
+        .ad-description {
+            color: #4d5156;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        
+        .ad-source {
+            color: #1a0dab;
+            font-size: 14px;
+        }
+        
+        /* Image + Text Ad Preview */
+        .image-text-preview {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 400px;
+        }
+        
+        .image-upload-section {
+            margin-bottom: 20px;
+        }
+        
+        .image-upload-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .image-upload {
+            width: 100%;
+            padding: 8px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        
+        .image-upload:hover {
+            border-color: #4285f4;
+        }
+        
+        .image-upload input[type="file"] {
+            display: none;
+        }
+        
+        .upload-text {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .image-text-content {
+            position: relative;
+        }
+        
+        .ad-image {
+            width: 100%;
+            height: 225px;
+            background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .image-placeholder {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #666;
+        }
+        
+        .ad-overlay {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .ad-info {
+            padding: 12px 16px;
+        }
+        
+        .ad-meta {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .advertiser-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .ad-details {
+            flex: 1;
+        }
+        
+        .ad-headline {
+            font-size: 14px;
+            font-weight: 500;
+            color: #030303;
+            line-height: 1.3;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .advertiser-name {
+            font-size: 12px;
+            color: #606060;
+            margin-bottom: 2px;
+        }
+        
+        .ad-description-text {
+            font-size: 12px;
+            color: #606060;
+            line-height: 1.3;
+        }
+        
+        .sponsored-tag {
+            background-color: #1a73e8;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+        
+        .more-options {
+            margin-left: auto;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        .more-options:hover {
+            background-color: #f0f0f0;
+        }
+        
+        /* Input Table */
+        .input-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .input-section h2 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background-color: #1f4e79;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        input[type="text"], input[type="url"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            resize: vertical;
+        }
+        
+        input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+        
+        textarea {
+            min-height: 40px;
+            max-height: 120px;
+        }
+        
+        .char-count {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .label-column {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            width: 200px;
+        }
+        
+        .input-column {
+            width: 60%;
+        }
+        
+        .count-column {
+            width: 80px;
+            text-align: center;
+        }
+        
+        /* Text Library Section */
+        .text-library-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .text-library-section h2 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .csv-upload-area {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            background-color: white;
+        }
+        
+        .csv-upload-area:hover {
+            border-color: #4285f4;
+        }
+        
+        .csv-upload-area input[type="file"] {
+            display: none;
+        }
+        
+        .csv-upload-text {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .csv-upload-btn {
+            background-color: #34a853;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .csv-upload-btn:hover {
+            background-color: #2d8f47;
+        }
+        
+        .excel-export-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-left: 10px;
+        }
+        
+        .excel-export-btn:hover {
+            background-color: #1557b0;
+        }
+        
+        .export-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .text-table-container {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .table-section-header {
+            background-color: #2c5282;
+            color: white;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 2px solid #1a365d;
+        }
+        
+        .text-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        
+        .text-table th {
+            background-color: #1f4e79;
+            color: white;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-right: 1px solid #2c5f8a;
+        }
+        
+        .text-table th:first-child {
+            width: 35%;
+            min-width: 200px;
+            background-color: #2d5a87;
+        }
+        
+        .text-table th:nth-child(2) {
+            width: 21.67%;
+            min-width: 150px;
+            background-color: #1a472a;
+        }
+        
+        .text-table th:nth-child(3) {
+            width: 21.67%;
+            min-width: 150px;
+            background-color: #7c2d12;
+        }
+        
+        .text-table th:nth-child(4) {
+            width: 21.67%;
+            min-width: 150px;
+            background-color: #5b21b6;
+        }
+        
+        .text-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            border-right: 1px solid #f0f0f0;
+            vertical-align: top;
+            line-height: 1.4;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: pre-wrap; /* 改行を保持して表示 */
+            word-wrap: break-word; /* 長い文字列の折り返し */
+        }
+        
+        .text-table td:first-child {
+            font-weight: 500;
+            color: #333;
+            background-color: #f8f9fa;
+            border-right: 2px solid #dfe1e5;
+        }
+        
+        .text-table td:nth-child(2) {
+            background-color: #f0fdf4;
+            color: #166534;
+        }
+        
+        .text-table td:nth-child(3) {
+            background-color: #fef2f2;
+            color: #991b1b;
+        }
+        
+        .text-table td:nth-child(4) {
+            background-color: #faf5ff;
+            color: #7c3aed;
+        }
+        
+        .text-table tr:hover td {
+            filter: brightness(0.95);
+        }
+        
+        .text-table tr.selected td {
+            background-color: #dbeafe !important;
+            color: #1e40af !important;
+            font-weight: 500;
+        }
+        
+        .table-scroll-container {
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+        
+        .no-data-message {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .preview-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Google Search Header -->
+        <div class="search-header">
+            <div class="google-logo">
+                <span class="g1">G</span><span class="o1">o</span><span class="o2">o</span><span class="g2">g</span><span class="l">l</span><span class="e">e</span>
+            </div>
+        
+        <!-- Preview Download Button -->
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="image-download-btn" onclick="downloadPreviewImage()" id="imageDownloadBtn">
+                📷 プレビュー画像をダウンロード
+            </button>
+        </div>
+            <input type="text" class="search-box" value="ブラウザゲーム" readonly aria-label="検索キーワード">
+        </div>
+        
+        <div class="search-results-info">
+            約 29,700,000 件（0.26 秒）
+        </div>
+        
+        <!-- Preview Container -->
+        <div class="preview-container">
+            <!-- Search Ad Preview -->
+            <div class="preview-section">
+                <h3>検索広告プレビュー</h3>
+                <div class="ad-preview">
+                    <div class="ad-label">広告・<span id="preview-url">https://www.example.com</span>▼</div>
+                    <a href="#" class="ad-title" id="preview-title">サンプル広告タイトル</a>
+                    <div class="ad-description">
+                        <div id="preview-desc1">説明文1がここに表示されます</div>
+                        <div id="preview-desc2">説明文2がここに表示されます</div>
+                    </div>
+                    <div class="ad-source" id="preview-source">example.com</div>
+                </div>
+            </div>
+            
+            <!-- Image + Text Ad Preview -->
+            <div class="preview-section">
+                <h3>画像＋テキスト広告プレビュー</h3>
+                <div class="image-upload-section">
+                    <label class="image-upload-label">広告画像をアップロード</label>
+                    <div class="image-upload" onclick="document.getElementById('imageInput').click()">
+                        <input type="file" id="imageInput" accept="image/*">
+                        <div class="upload-text">画像をクリックしてアップロード</div>
+                    </div>
+                </div>
+                <div class="image-text-preview">
+                    <div class="image-text-content">
+                        <div class="ad-image">
+                            <div class="image-placeholder">📱</div>
+                            <div class="ad-overlay">
+                                <span>広告</span>
+                                <span>•</span>
+                                <span id="image-ad-source">example.com</span>
+                            </div>
+                        </div>
+                        <div class="ad-info">
+                            <div class="ad-meta">
+                                <div class="advertiser-avatar"></div>
+                                <div class="ad-details">
+                                    <div class="ad-headline" id="image-ad-title">サンプル広告タイトル</div>
+                                    <div class="advertiser-name">
+                                        <span id="image-ad-channel">サンプル広告主</span>
+                                        <span class="sponsored-tag">Sponsored</span>
+                                    </div>
+                                    <div class="ad-description-text" id="image-ad-description">説明文がここに表示されます</div>
+                                </div>
+                                <div class="more-options">⋮</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Input Section -->
+        <div class="input-section">
+            <h2>広告設定</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">項目</th>
+                        <th scope="col">内容</th>
+                        <th scope="col">文字数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="label-column">見出し L1</td>
+                        <td class="input-column">
+                            <input type="text" id="headline1" placeholder="見出し1を入力" maxlength="30" aria-label="見出し1">
+                        </td>
+                        <td class="count-column char-count" id="count1">0</td>
+                    </tr>
+                    <tr>
+                        <td class="label-column">見出し L2</td>
+                        <td class="input-column">
+                            <input type="text" id="headline2" placeholder="見出し2を入力" maxlength="30" aria-label="見出し2">
+                        </td>
+                        <td class="count-column char-count" id="count2">0</td>
+                    </tr>
+                    <tr>
+                        <td class="label-column">見出し L3</td>
+                        <td class="input-column">
+                            <input type="text" id="headline3" placeholder="見出し3を入力" maxlength="30" aria-label="見出し3">
+                        </td>
+                        <td class="count-column char-count" id="count3">0</td>
+                    </tr>
+                    <tr style="background-color: #e8f4f8;">
+                        <td class="label-column">説明文1</td>
+                        <td class="input-column">
+                            <textarea id="description1" placeholder="説明文1を入力" maxlength="90" rows="2" aria-label="説明文1"></textarea>
+                        </td>
+                        <td class="count-column char-count" id="count4">0</td>
+                    </tr>
+                    <tr style="background-color: #e8f4f8;">
+                        <td class="label-column">説明文2</td>
+                        <td class="input-column">
+                            <textarea id="description2" placeholder="説明文2を入力" maxlength="90" rows="2" aria-label="説明文2"></textarea>
+                        </td>
+                        <td class="count-column char-count" id="count5">0</td>
+                    </tr>
+                    <tr>
+                        <td class="label-column">表示URL</td>
+                        <td class="input-column">
+                            <input type="url" id="displayUrl" placeholder="https://www.example.com" aria-label="表示URL">
+                        </td>
+                        <td class="count-column char-count" id="count6">0</td>
+                    </tr>
+                    <tr>
+                        <td class="label-column">パス1</td>
+                        <td class="input-column">
+                            <input type="text" id="path1" placeholder="パス1を入力" maxlength="15" aria-label="パス1">
+                        </td>
+                        <td class="count-column char-count" id="count7">0</td>
+                    </tr>
+                    <tr>
+                        <td class="label-column">パス2</td>
+                        <td class="input-column">
+                            <input type="text" id="path2" placeholder="パス2を入力" maxlength="15" aria-label="パス2">
+                        </td>
+                        <td class="count-column char-count" id="count8">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Text Library Section -->
+        <div class="text-library-section">
+            <h2>広告文章一覧</h2>
+            
+            <div class="export-controls">
+                <div class="csv-upload-area" onclick="document.getElementById('csvInput').click()" style="flex: 1; margin-bottom: 0;">
+                    <input type="file" id="csvInput" accept=".csv" style="display: none;" aria-label="CSVファイルをアップロード">
+                    <div class="csv-upload-text">CSVファイルをアップロードして広告文章を一括登録</div>
+                    <button class="csv-upload-btn">CSVファイルを選択</button>
+                </div>
+                <button class="excel-export-btn" onclick="exportToExcel()">📊 文章一覧をExcelで出力</button>
+            </div>
+            
+            <!-- 見出し文 -->
+            <div class="text-table-container">
+                <div class="table-section-header">見出し文</div>
+                <div class="table-scroll-container">
+                    <table class="text-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="background-color: #2d5a87;">日本語</th>
+                                <th scope="col" style="background-color: #1a472a;">英語</th>
+                                <th scope="col" style="background-color: #7c2d12;">繁体字</th>
+                                <th scope="col" style="background-color: #5b21b6;">韓国語</th>
+                            </tr>
+                        </thead>
+                        <tbody id="headlinesTableBody">
+                            <tr>
+                                <td colspan="4" class="no-data-message">
+                                    CSVファイルをアップロードして見出し文を表示してください
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 説明文 -->
+            <div class="text-table-container">
+                <div class="table-section-header">説明文</div>
+                <div class="table-scroll-container">
+                    <table class="text-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="background-color: #2d5a87;">日本語</th>
+                                <th scope="col" style="background-color: #1a472a;">英語</th>
+                                <th scope="col" style="background-color: #7c2d12;">繁体字</th>
+                                <th scope="col" style="background-color: #5b21b6;">韓国語</th>
+                            </tr>
+                        </thead>
+                        <tbody id="descriptionsTableBody">
+                            <tr>
+                                <td colspan="4" class="no-data-message">
+                                    CSVファイルをアップロードして説明文を表示してください
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- SNS文 -->
+            <div class="text-table-container">
+                <div class="table-section-header">SNS文</div>
+                <div class="table-scroll-container">
+                    <table class="text-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="background-color: #2d5a87;">日本語</th>
+                                <th scope="col" style="background-color: #1a472a;">英語</th>
+                                <th scope="col" style="background-color: #7c2d12;">繁体字</th>
+                                <th scope="col" style="background-color: #5b21b6;">韓国語</th>
+                            </tr>
+                        </thead>
+                        <tbody id="snsTableBody">
+                            <tr>
+                                <td colspan="4" class="no-data-message">
+                                    CSVファイルをアップロードしてSNS文を表示してください
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Text library data
+        let textLibrary = {
+            headlines: [],
+            descriptions: []
+        };
+        
+        let currentCategory = '';
+        // Get all input elements
+        const inputs = {
+            headline1: document.getElementById('headline1'),
+            headline2: document.getElementById('headline2'),
+            headline3: document.getElementById('headline3'),
+            description1: document.getElementById('description1'),
+            description2: document.getElementById('description2'),
+            displayUrl: document.getElementById('displayUrl'),
+            path1: document.getElementById('path1'),
+            path2: document.getElementById('path2')
+        };
+
+        // Get search preview elements
+        const searchPreview = {
+            title: document.getElementById('preview-title'),
+            desc1: document.getElementById('preview-desc1'),
+            desc2: document.getElementById('preview-desc2'),
+            url: document.getElementById('preview-url'),
+            source: document.getElementById('preview-source')
+        };
+
+        // Get image + text ad preview elements
+        const imageAdPreview = {
+            title: document.getElementById('image-ad-title'),
+            description: document.getElementById('image-ad-description'),
+            source: document.getElementById('image-ad-source'),
+            channel: document.getElementById('image-ad-channel')
+        };
+
+        // Character count elements
+        const counts = [
+            document.getElementById('count1'),
+            document.getElementById('count2'),
+            document.getElementById('count3'),
+            document.getElementById('count4'),
+            document.getElementById('count5'),
+            document.getElementById('count6'),
+            document.getElementById('count7'),
+            document.getElementById('count8')
+        ];
+
+        // Update character counts (half-width basis)
+        function updateCharCount(input, countElement) {
+            // Convert full-width characters to half-width equivalent count
+            const text = input.value;
+            let halfWidthCount = 0;
+            
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                // Full-width characters (Japanese, Chinese, etc.) count as 2
+                if (char.match(/[^\x00-\x7F]/)) {
+                    halfWidthCount += 2;
+                } else {
+                    halfWidthCount += 1;
+                }
+            }
+            
+            countElement.textContent = halfWidthCount;
+            
+            // Color coding for character limits
+            if (input.maxLength) {
+                const maxHalfWidth = input.maxLength * 2; // Assume max limit is for half-width
+                const percentage = halfWidthCount / maxHalfWidth;
+                if (percentage > 0.9) {
+                    countElement.style.color = '#d93025';
+                } else if (percentage > 0.7) {
+                    countElement.style.color = '#ea8600';
+                } else {
+                    countElement.style.color = '#666';
+                }
+            }
+        }
+
+        // Update search preview
+        function updateSearchPreview() {
+            // Update title (combine all headlines with spaces)
+            let titleParts = [];
+            if (inputs.headline1.value) titleParts.push(inputs.headline1.value);
+            if (inputs.headline2.value) titleParts.push(inputs.headline2.value);
+            if (inputs.headline3.value) titleParts.push(inputs.headline3.value);
+            
+            let title = titleParts.length > 0 ? titleParts.join(' ') : 'サンプル広告タイトル';
+            searchPreview.title.textContent = title;
+
+            // Update descriptions
+            searchPreview.desc1.textContent = inputs.description1.value || '説明文1がここに表示されます';
+            searchPreview.desc2.textContent = inputs.description2.value || '説明文2がここに表示されます';
+
+            // Update URL and source
+            let url = inputs.displayUrl.value || 'https://www.example.com';
+            let paths = '';
+            if (inputs.path1.value) paths += '/' + inputs.path1.value;
+            if (inputs.path2.value) paths += '/' + inputs.path2.value;
+            
+            searchPreview.url.textContent = url + paths;
+            
+            // Extract domain for source
+            try {
+                const domain = new URL(url).hostname.replace('www.', '');
+                searchPreview.source.textContent = domain;
+            } catch (e) {
+                searchPreview.source.textContent = 'example.com';
+            }
+        }
+
+        // Update image + text ad preview
+        function updateImageAdPreview() {
+            // Update title (combine all headlines with spaces)
+            let titleParts = [];
+            if (inputs.headline1.value) titleParts.push(inputs.headline1.value);
+            if (inputs.headline2.value) titleParts.push(inputs.headline2.value);
+            if (inputs.headline3.value) titleParts.push(inputs.headline3.value);
+            
+            let title = titleParts.length > 0 ? titleParts.join(' ') : 'サンプル広告タイトル';
+            imageAdPreview.title.textContent = title;
+
+            // Update description (use first available description)
+            let description = inputs.description1.value || inputs.description2.value || '説明文がここに表示されます';
+            imageAdPreview.description.textContent = description;
+
+            // Update source and channel
+            let url = inputs.displayUrl.value || 'https://www.example.com';
+            try {
+                const domain = new URL(url).hostname.replace('www.', '');
+                imageAdPreview.source.textContent = domain;
+                imageAdPreview.channel.textContent = domain.charAt(0).toUpperCase() + domain.slice(1) + '公式';
+            } catch (e) {
+                imageAdPreview.source.textContent = 'example.com';
+                imageAdPreview.channel.textContent = 'サンプル広告主';
+            }
+        }
+
+        // Update all previews
+        function updatePreviews() {
+            updateSearchPreview();
+            updateImageAdPreview();
+        }
+
+        // Excel export functionality
+        function exportToExcel() {
+            // Import XLSX library
+            if (typeof XLSX === 'undefined') {
+                alert('Excelエクスポート機能を読み込み中です。少し待ってから再度お試しください。');
+                // Dynamically load XLSX
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                script.onload = () => exportToExcel();
+                document.head.appendChild(script);
+                return;
+            }
+
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Sheet 1: 広告プレビューと設定
+            const sheet1Data = [
+                ['広告プレビュー・設定情報'],
+                [''],
+                ['=== 検索広告プレビュー ==='],
+                ['タイトル', searchPreview.title.textContent],
+                ['説明文1', searchPreview.desc1.textContent],
+                ['説明文2', searchPreview.desc2.textContent],
+                ['表示URL', searchPreview.url.textContent],
+                ['ソース', searchPreview.source.textContent],
+                [''],
+                ['=== 画像+テキスト広告プレビュー ==='],
+                ['タイトル', imageAdPreview.title.textContent],
+                ['説明文', imageAdPreview.description.textContent],
+                ['ソース', imageAdPreview.source.textContent],
+                ['チャンネル名', imageAdPreview.channel.textContent],
+                [''],
+                ['=== 設定値 ==='],
+                ['項目', '内容', '文字数（半角換算）'],
+                ['見出し L1', inputs.headline1.value, getHalfWidthLength(inputs.headline1.value)],
+                ['見出し L2', inputs.headline2.value, getHalfWidthLength(inputs.headline2.value)],
+                ['見出し L3', inputs.headline3.value, getHalfWidthLength(inputs.headline3.value)],
+                ['説明文1', inputs.description1.value, getHalfWidthLength(inputs.description1.value)],
+                ['説明文2', inputs.description2.value, getHalfWidthLength(inputs.description2.value)],
+                ['表示URL', inputs.displayUrl.value, getHalfWidthLength(inputs.displayUrl.value)],
+                ['パス1', inputs.path1.value, getHalfWidthLength(inputs.path1.value)],
+                ['パス2', inputs.path2.value, getHalfWidthLength(inputs.path2.value)],
+                [''],
+                ['出力日時', new Date().toLocaleString('ja-JP')]
+            ];
+            
+            const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
+            
+            // Set column widths
+            ws1['!cols'] = [
+                { wch: 20 },
+                { wch: 50 },
+                { wch: 15 }
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, ws1, '広告プレビュー・設定');
+            
+            // Sheet 2: 文章一覧
+            const sheet2Data = [
+                ['広告文章一覧'],
+                [''],
+                ['=== 見出し文 ==='],
+                ['日本語', '英語', '繁体字', '韓国語', 'カテゴリ']
+            ];
+            
+            // Add headlines data
+            textLibrary.headlines.forEach(item => {
+                sheet2Data.push([
+                    item.japanese || '',
+                    item.english || '',
+                    item.traditional_chinese || '',
+                    item.korean || '',
+                    item.category || ''
+                ]);
+            });
+            
+            sheet2Data.push(['']);
+            sheet2Data.push(['=== 説明文 ===']);
+            sheet2Data.push(['日本語', '英語', '繁体字', '韓国語', 'カテゴリ']);
+            
+            // Add descriptions data
+            textLibrary.descriptions.forEach(item => {
+                sheet2Data.push([
+                    item.japanese || '',
+                    item.english || '',
+                    item.traditional_chinese || '',
+                    item.korean || '',
+                    item.category || ''
+                ]);
+            });
+            
+            sheet2Data.push(['']);
+            sheet2Data.push(['=== SNS文 ===']);
+            sheet2Data.push(['日本語', '英語', '繁体字', '韓国語', 'カテゴリ']);
+            
+            // Add SNS data
+            textLibrary.sns.forEach(item => {
+                sheet2Data.push([
+                    item.japanese || '',
+                    item.english || '',
+                    item.traditional_chinese || '',
+                    item.korean || '',
+                    item.category || ''
+                ]);
+            });
+            
+            const ws2 = XLSX.utils.aoa_to_sheet(sheet2Data);
+            
+            // Set column widths for sheet 2
+            ws2['!cols'] = [
+                { wch: 40 },
+                { wch: 40 },
+                { wch: 40 },
+                { wch: 40 },
+                { wch: 20 }
+            ];
+            
+            XLSX.utils.book_append_sheet(wb, ws2, '文章一覧');
+            
+            // Generate filename with timestamp
+            const now = new Date();
+            const filename = `広告プレビュー_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.xlsx`;
+            
+            // Save file
+            XLSX.writeFile(wb, filename);
+        }
+        
+        // Helper function to calculate half-width character length
+        function getHalfWidthLength(text) {
+            if (!text) return 0;
+            let halfWidthCount = 0;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                // Full-width characters count as 2
+                if (char.match(/[^\x00-\x7F]/)) {
+                    halfWidthCount += 2;
+                } else {
+                    halfWidthCount += 1;
+                }
+            }
+            return halfWidthCount;
+        }
+
+        // Helper function to calculate half-width character length
+        function getHalfWidthLength(text) {
+            if (!text) return 0;
+            let halfWidthCount = 0;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                // Full-width characters count as 2
+                if (char.match(/[^\x00-\x7F]/)) {
+                    halfWidthCount += 2;
+                } else {
+                    halfWidthCount += 1;
+                }
+            }
+            return halfWidthCount;
+        }
+
+        // CSV upload functionality
+        const csvInput = document.getElementById('csvInput');
+        
+        csvInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type === 'text/csv') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const csvData = e.target.result;
+                    parseCsvData(csvData);
+                };
+                reader.readAsText(file, 'utf-8');
+            } else if (file) {
+                alert('CSVファイルを選択してください。');
+            }
+        });
+        
+        function parseCsvData(csvData) {
+            // Advanced CSV parser that handles quoted fields with newlines
+            function parseCSV(csvText) {
+                const rows = [];
+                let currentRow = [];
+                let currentField = '';
+                let inQuotes = false;
+                let i = 0;
+                
+                while (i < csvText.length) {
+                    const char = csvText[i];
+                    const nextChar = csvText[i + 1];
+                    
+                    if (char === '"') {
+                        if (inQuotes && nextChar === '"') {
+                            // Escaped quote
+                            currentField += '"';
+                            i += 2;
+                            continue;
+                        } else {
+                            // Toggle quote state
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        // Field separator
+                        currentRow.push(currentField.trim());
+                        currentField = '';
+                    } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                        // Row separator (not inside quotes)
+                        if (currentField || currentRow.length > 0) {
+                            currentRow.push(currentField.trim());
+                            if (currentRow.some(field => field.length > 0)) {
+                                rows.push(currentRow);
+                            }
+                            currentRow = [];
+                            currentField = '';
+                        }
+                        // Skip \r\n combinations
+                        if (char === '\r' && nextChar === '\n') {
+                            i++;
+                        }
+                    } else if (char === '\n' && inQuotes) {
+                        // Newline inside quotes - preserve as part of field content
+                        currentField += '\n'; // 改行を保持
+                    } else if (char === '\r' && inQuotes) {
+                        // Carriage return inside quotes - preserve if not followed by \n
+                        if (nextChar !== '\n') {
+                            currentField += '\n'; // \r単体の場合は\nに変換
+                        }
+                        // \r\nの場合は\rをスキップして\nのみ処理
+                    } else {
+                        currentField += char;
+                    }
+                    
+                    i++;
+                }
+                
+                // Handle last field and row
+                if (currentField || currentRow.length > 0) {
+                    currentRow.push(currentField.trim());
+                    if (currentRow.some(field => field.length > 0)) {
+                        rows.push(currentRow);
+                    }
+                }
+                
+                return rows;
+            }
+            
+            const rows = parseCSV(csvData);
+            if (rows.length < 2) {
+                alert('CSVファイルが正しくありません。');
+                return;
+            }
+            
+            const headers = rows[0];
+            
+            // Find column indices (case insensitive)
+            const japaneseIndex = headers.findIndex(header => 
+                header && (header.toLowerCase().includes('日本語') || header.toLowerCase().includes('japanese')));
+            const englishIndex = headers.findIndex(header => 
+                header && (header.toLowerCase().includes('英語') || header.toLowerCase().includes('english')));
+            const chineseIndex = headers.findIndex(header => 
+                header && (header.toLowerCase().includes('繁体字') || header.toLowerCase().includes('traditional') || header.toLowerCase().includes('chinese')));
+            const koreanIndex = headers.findIndex(header => 
+                header && (header.toLowerCase().includes('韓国語') || header.toLowerCase().includes('korean')));
+            const categoryIndex = headers.findIndex(header => 
+                header && (header.toLowerCase().includes('カテゴリ') || header.toLowerCase().includes('category')));
+            
+            if (japaneseIndex === -1) {
+                alert('日本語列が見つかりません。CSV形式を確認してください。');
+                return;
+            }
+            
+            // Clear existing library
+            textLibrary.headlines = [];
+            textLibrary.descriptions = [];
+            textLibrary.sns = [];
+            
+            let headlineCount = 0;
+            let descriptionCount = 0;
+            let snsCount = 0;
+            
+            // Process each row (skip header)
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.length > japaneseIndex && row[japaneseIndex] && row[japaneseIndex].trim()) {
+                    const japanese = row[japaneseIndex] ? row[japaneseIndex].trim() : '';
+                    const english = englishIndex !== -1 && row[englishIndex] ? row[englishIndex].trim() : '';
+                    const traditional_chinese = chineseIndex !== -1 && row[chineseIndex] ? row[chineseIndex].trim() : '';
+                    const korean = koreanIndex !== -1 && row[koreanIndex] ? row[koreanIndex].trim() : '';
+                    const category = categoryIndex !== -1 && row[categoryIndex] ? row[categoryIndex].trim() : '';
+                    
+                    if (japanese) {
+                        const textItem = {
+                            japanese,
+                            english,
+                            traditional_chinese,
+                            korean,
+                            category
+                        };
+                        
+                        // Debug: Log category for troubleshooting
+                        console.log(`Row ${i}: Category="${category}", Japanese="${japanese.substring(0, 30).replace(/\n/g, '\\n')}..."`);
+                        
+                        // Categorize based on category (more flexible matching)
+                        const categoryLower = category.toLowerCase();
+                        const categoryNormalized = category.replace(/\s+/g, ''); // Remove all spaces
+                        
+                        if (categoryNormalized.includes('SNS文') || 
+                            categoryNormalized.includes('SNS') ||
+                            categoryLower.includes('sns') ||
+                            categoryLower.includes('social') ||
+                            categoryLower.includes('ソーシャル')) {
+                            textLibrary.sns.push(textItem);
+                            snsCount++;
+                            console.log(`Categorized as SNS: ${japanese.substring(0, 30).replace(/\n/g, '\\n')}`);
+                        } else if (category.includes('見出し') || 
+                                  category.includes('ヘッドライン') || 
+                                  category.includes('タイトル') || 
+                                  categoryLower.includes('headline') ||
+                                  categoryLower.includes('title') ||
+                                  (category === '' && japanese.length <= 30)) {
+                            textLibrary.headlines.push(textItem);
+                            headlineCount++;
+                            console.log(`Categorized as Headline: ${japanese.substring(0, 30).replace(/\n/g, '\\n')}`);
+                        } else {
+                            textLibrary.descriptions.push(textItem);
+                            descriptionCount++;
+                            console.log(`Categorized as Description: ${japanese.substring(0, 30).replace(/\n/g, '\\n')}`);
+                        }
+                    }
+                }
+            }
+            
+            renderTextTables();
+            alert(`CSVから見出し文: ${headlineCount}件、説明文: ${descriptionCount}件、SNS文: ${snsCount}件を読み込みました。`);
+            
+            // Debug: Log final counts
+            console.log(`Final counts - Headlines: ${textLibrary.headlines.length}, Descriptions: ${textLibrary.descriptions.length}, SNS: ${textLibrary.sns.length}`);
+        }
+
+        // Render text tables
+        function renderTextTables() {
+            renderTable('headlines', textLibrary.headlines, 'headlinesTableBody');
+            renderTable('descriptions', textLibrary.descriptions, 'descriptionsTableBody');
+            renderTable('sns', textLibrary.sns, 'snsTableBody');
+        }
+        
+        function renderTable(category, data, tbodyId) {
+            const tableBody = document.getElementById(tbodyId);
+            
+            if (!data || data.length === 0) {
+                const categoryName = category === 'headlines' ? '見出し文' : 
+                                   category === 'descriptions' ? '説明文' : 'SNS文';
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="no-data-message">
+                            CSVファイルをアップロードして${categoryName}を表示してください
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.japanese || ''}</td>
+                    <td>${item.english || ''}</td>
+                    <td>${item.traditional_chinese || ''}</td>
+                    <td>${item.korean || ''}</td>
+                `;
+                
+                row.addEventListener('click', () => selectTableRow(category, index, row, item));
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Select table row
+        function selectTableRow(category, index, rowElement, item) {
+            // Remove previous selection
+            document.querySelectorAll('.text-table tr.selected').forEach(row => {
+                row.classList.remove('selected');
+            });
+            
+            // Add selection to clicked row
+            rowElement.classList.add('selected');
+            selectedRowIndex = index;
+            
+            if (!item || !item.japanese) return;
+            
+            // Use Japanese text as primary text
+            const text = item.japanese;
+            
+            // Fill appropriate input field based on category
+            if (category === 'headlines') {
+                // Fill headline field
+                if (!inputs.headline1.value) {
+                    inputs.headline1.value = text;
+                } else if (!inputs.headline2.value) {
+                    inputs.headline2.value = text;
+                } else if (!inputs.headline3.value) {
+                    inputs.headline3.value = text;
+                } else {
+                    inputs.headline1.value = text;
+                }
+            } else {
+                // Fill description field for both descriptions and sns
+                if (!inputs.description1.value) {
+                    inputs.description1.value = text;
+                } else if (!inputs.description2.value) {
+                    inputs.description2.value = text;
+                } else {
+                    inputs.description1.value = text;
+                }
+            }
+            
+            // Update character counts and previews
+            Object.values(inputs).forEach((input, index) => {
+                updateCharCount(input, counts[index]);
+            });
+            updatePreviews();
+        }
+        
+        // Image upload functionality
+        const imageInput = document.getElementById('imageInput');
+        const adImage = document.querySelector('.ad-image');
+        const imagePlaceholder = document.querySelector('.image-placeholder');
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    adImage.style.backgroundImage = `url(${e.target.result})`;
+                    imagePlaceholder.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Add event listeners
+        Object.values(inputs).forEach((input, index) => {
+            input.addEventListener('input', () => {
+                updateCharCount(input, counts[index]);
+                updatePreviews();
+            });
+            
+            // Initialize character count
+            updateCharCount(input, counts[index]);
+        });
+
+        // Initialize
+        renderTextTables();
+        updatePreviews();
+    </script>
+</body>
+</html>
